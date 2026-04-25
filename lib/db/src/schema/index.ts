@@ -12,16 +12,25 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 
-export const usersTable = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  guestId: text("guest_id").notNull().unique(),
-  displayName: text("display_name").notNull().default("Athlete"),
-  equipment: text("equipment").notNull().default("full_gym"),
-  units: text("units").notNull().default("kg"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const usersTable = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    guestId: text("guest_id").notNull().unique(),
+    username: text("username"),
+    passwordHash: text("password_hash"),
+    displayName: text("display_name").notNull().default("Athlete"),
+    equipment: text("equipment").notNull().default("full_gym"),
+    units: text("units").notNull().default("kg"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [uniqueIndex("users_username_idx").on(t.username)],
+);
 
 export const exercisesTable = pgTable(
   "exercises",

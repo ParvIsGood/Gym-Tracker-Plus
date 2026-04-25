@@ -1,0 +1,76 @@
+Upgrade my gym workout tracker app to use authentication with hybrid storage: local + cloud sync for best speed and reliability.
+
+Goal:
+Use local storage/database for instant fast performance, and automatically sync all user data to cloud in background.
+
+1. Authentication System
+- Add secure signup and login with username + password
+- Unique username required
+- Secure password hashing (bcrypt or modern secure hashing)
+- Logout button
+- Persistent login sessions
+- Forgot password placeholder page
+
+2. Hybrid Storage Model
+Local Storage:
+- Save recent workouts locally for instant loading
+- Cache dashboard, charts, streaks, profile data
+- App should open instantly even offline
+
+Cloud Storage:
+- Sync all data to cloud database automatically
+- Use PostgreSQL / Supabase / Replit DB (best supported option)
+
+3. Smart Sync Logic
+- Save locally first, then sync to cloud silently
+- If internet unavailable, queue changes and sync later
+- Resolve duplicates intelligently using latest timestamp
+- Show sync status:
+  - Synced
+  - Syncing...
+  - Offline mode
+
+4. Per User Private Data
+Each account stores:
+- Workout history
+- Exercises
+- Sets / reps / weights
+- Body weight logs
+- Weekly plan
+- PRs
+- Streak count
+- Charts data
+- Settings
+
+5. Cross Device Support
+If user logs into another phone/laptop:
+- Download latest cloud data
+- Merge with local cache safely
+- Continue instantly
+
+6. Security
+- Protect all routes
+- Each user only accesses own data
+- Secure cookies or JWT
+- Basic rate limiting login attempts
+
+7. UI Changes
+- Premium login/signup pages
+- Profile page
+- Cloud sync badge
+- Offline mode badge
+- Last synced time
+- Loading skeleton screens
+
+8. Keep Existing Design
+- Preserve IronLog dark premium UI
+- Keep all current workout tracker features
+
+9. Performance
+- Instant app launch
+- Fast navigation
+- Smooth offline-first experience
+
+10. Final Result
+Implement complete production-ready authentication + local cache + cloud sync system directly into current project files.
+Test signup/login/save workout/offline sync/cross-device sync flow.

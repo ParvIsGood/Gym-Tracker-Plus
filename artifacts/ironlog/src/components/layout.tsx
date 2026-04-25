@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Home, CalendarDays, Dumbbell, LineChart, History, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SyncStatus } from "@/components/sync-status";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -15,6 +16,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   // Hide nav on workout active and complete screens
   const hideNav = location.startsWith("/workout/active/") || location.includes("/complete") || location === "/onboarding";
+  const showHeader = !hideNav;
 
   return (
     <div className="min-h-[100dvh] bg-background w-full flex flex-col md:flex-row relative">
@@ -22,6 +24,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
         "flex-1 w-full max-w-2xl mx-auto pb-20 md:pb-0 md:pt-4 transition-all duration-300",
         hideNav && "pb-0 md:pb-0 max-w-full md:max-w-2xl"
       )}>
+        {showHeader && (
+          <div className="sticky top-0 z-40 flex justify-end items-center gap-2 px-4 pt-3 pb-1 bg-gradient-to-b from-background via-background/95 to-background/0">
+            <SyncStatus />
+            <Link
+              href="/settings"
+              className={cn(
+                "inline-flex items-center justify-center w-8 h-8 rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors",
+                location === "/settings" && "text-primary border-primary/50",
+              )}
+              aria-label="Settings"
+            >
+              <Settings size={15} />
+            </Link>
+          </div>
+        )}
         {children}
       </main>
 

@@ -10,8 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Account signup, login, session
   - name: profile
-    description: Guest profile and preferences
+    description: User profile and preferences
   - name: exercises
     description: Exercise catalog and form guides
   - name: plan
@@ -38,11 +40,70 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 
+  /auth/signup:
+    post:
+      operationId: signup
+      tags: [auth]
+      summary: Create an account, optionally migrating an existing guest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupBody"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "409":
+          description: Username already taken
+        "400":
+          description: Invalid input
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in to an existing account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+        "429":
+          description: Too many attempts
+
+  /auth/me:
+    get:
+      operationId: getCurrentAuth
+      tags: [auth]
+      summary: Get the active session profile
+      responses:
+        "200":
+          description: Current auth state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthState"
+
   /profile:
     get:
       operationId: getProfile
       tags: [profile]
-      summary: Get the current guest profile
+      summary: Get the current profile
       responses:
         "200":
           description: Profile
@@ -451,9 +512,11 @@ components:
 
     Profile:
       type: object
-      required: [id, displayName, equipment, units, createdAt]
+      required: [id, displayName, equipment, units, isGuest, createdAt]
       properties:
         id:
+          type: string
+        username:
           type: string
         displayName:
           type: string
@@ -461,6 +524,8 @@ components:
           $ref: "#/components/schemas/EquipmentLevel"
         units:
           $ref: "#/components/schemas/Units"
+        isGuest:
+          type: boolean
         createdAt:
           type: string
           format: date-time
@@ -680,6 +745,51 @@ components:
             $ref: "#/components/schemas/PersonalRecord"
         currentStreak:
           type: integer
+
+    SignupBody:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 32
+        password:
+          type: string
+          minLength: 6
+          maxLength: 128
+        displayName:
+          type: string
+        migrateGuestId:
+          type: string
+          description: Optional — absorb an existing guest account's data
+
+    LoginBody:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [token, profile]
+      properties:
+        token:
+          type: string
+        profile:
+          $ref: "#/components/schemas/Profile"
+
+    AuthState:
+      type: object
+      required: [authenticated]
+      properties:
+        authenticated:
+          type: boolean
+        profile:
+          $ref: "#/components/schemas/Profile"
 
     StatsSummary:
       type: object

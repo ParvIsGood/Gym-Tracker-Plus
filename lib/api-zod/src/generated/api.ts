@@ -15,13 +15,83 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
- * @summary Get the current guest profile
+ * @summary Create an account, optionally migrating an existing guest
+ */
+export const signupBodyUsernameMin = 3;
+export const signupBodyUsernameMax = 32;
+
+export const signupBodyPasswordMin = 6;
+export const signupBodyPasswordMax = 128;
+
+export const SignupBody = zod.object({
+  username: zod.string().min(signupBodyUsernameMin).max(signupBodyUsernameMax),
+  password: zod.string().min(signupBodyPasswordMin).max(signupBodyPasswordMax),
+  displayName: zod.string().optional(),
+  migrateGuestId: zod
+    .string()
+    .optional()
+    .describe("Optional — absorb an existing guest account's data"),
+});
+
+/**
+ * @summary Log in to an existing account
+ */
+export const LoginBody = zod.object({
+  username: zod.string(),
+  password: zod.string(),
+});
+
+export const LoginResponse = zod.object({
+  token: zod.string(),
+  profile: zod.object({
+    id: zod.string(),
+    username: zod.string().optional(),
+    displayName: zod.string(),
+    equipment: zod.enum([
+      "full_gym",
+      "machines_only",
+      "dumbbells_only",
+      "home",
+    ]),
+    units: zod.enum(["kg", "lb"]),
+    isGuest: zod.boolean(),
+    createdAt: zod.coerce.date(),
+  }),
+});
+
+/**
+ * @summary Get the active session profile
+ */
+export const GetCurrentAuthResponse = zod.object({
+  authenticated: zod.boolean(),
+  profile: zod
+    .object({
+      id: zod.string(),
+      username: zod.string().optional(),
+      displayName: zod.string(),
+      equipment: zod.enum([
+        "full_gym",
+        "machines_only",
+        "dumbbells_only",
+        "home",
+      ]),
+      units: zod.enum(["kg", "lb"]),
+      isGuest: zod.boolean(),
+      createdAt: zod.coerce.date(),
+    })
+    .optional(),
+});
+
+/**
+ * @summary Get the current profile
  */
 export const GetProfileResponse = zod.object({
   id: zod.string(),
+  username: zod.string().optional(),
   displayName: zod.string(),
   equipment: zod.enum(["full_gym", "machines_only", "dumbbells_only", "home"]),
   units: zod.enum(["kg", "lb"]),
+  isGuest: zod.boolean(),
   createdAt: zod.coerce.date(),
 });
 
@@ -38,9 +108,11 @@ export const UpdateProfileBody = zod.object({
 
 export const UpdateProfileResponse = zod.object({
   id: zod.string(),
+  username: zod.string().optional(),
   displayName: zod.string(),
   equipment: zod.enum(["full_gym", "machines_only", "dumbbells_only", "home"]),
   units: zod.enum(["kg", "lb"]),
+  isGuest: zod.boolean(),
   createdAt: zod.coerce.date(),
 });
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useUpdateProfile, useAddBodyweight, getGetProfileQueryKey } from "@workspace/api-client-react";
+import { markOnboarded } from "@/auth/context";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ export default function Onboarding() {
       }
 
       queryClient.invalidateQueries({ queryKey: getGetProfileQueryKey() });
+      markOnboarded();
       setLocation("/");
     } catch (err) {
       console.error(err);

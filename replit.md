@@ -2,7 +2,9 @@
 
 A premium dark-themed mobile-first gym workout tracker. Plan your week, log
 workouts fast, track strength progress, body weight, water intake, streaks, and
-PRs. Guest mode auto-creates a cloud-synced profile per device.
+PRs. Hybrid auth: optional username/password account for cross-device sync, with
+guest mode as a frictionless fallback. Local cache + cloud sync with live status
+badges (Synced / Syncing / Offline).
 
 ## Architecture
 
@@ -13,8 +15,9 @@ pnpm monorepo with two main artifacts:
   shadcn/ui, framer-motion for transitions, recharts for progress charts, wouter
   for routing.
 - **`artifacts/api-server`** — Express 5 API server. Routes mounted under `/api`.
-  All routes (except `/api/health`) require a `Authorization: Bearer guest:<uuid>`
-  header. The `guestAuth` middleware upserts a user row on first request.
+  All routes (except `/api/health` and `/api/auth/*`) require an
+  `Authorization: Bearer <token>` header. The `authRequired` middleware accepts
+  two token formats and sets `req.userId` + `req.isGuest` accordingly.
 
 Shared libraries:
 
@@ -25,14 +28,47 @@ Shared libraries:
   session_exercises, sets, bodyweight, water_intake. Push schema with
   `pnpm --filter @workspace/db run push`.
 
-## Guest auth
+## Hybrid auth
 
-Frontend (`artifacts/ironlog/src/main.tsx`) generates a UUID on first load,
-stores it in `localStorage["ironlog.guestId"]`, and registers an auth-token
-getter on the generated API client. Every request goes out with
-`Authorization: Bearer guest:<uuid>`. Backend upserts a user row keyed by
-`guest_id`. Profile, plan, sessions, stats, body weight, water — all scoped per
-guest user.
+Two token formats are supported on the same `Authorization: Bearer …` header,
+both handled by `artifacts/api-server/src/middlewares/guest.ts → authRequired`:
+
+- `Bearer guest:<uuid>` — a UUID generated client-side on first load and stored
+  in `localStorage["ironlog.guestId"]`. Backend upserts a user row keyed by
+  `guest_id`. Used while the user has no account.
+- `Bearer user:<jwt>` — a 30-day HS256 JWT signed with `SESSION_SECRET`,
+  payload `{sub:userId,type:"user"}`. Returned by `/api/auth/login` and
+  `/api/auth/signup`, stored in `localStorage["ironlog.userToken"]`.
+
+Auth routes (`artifacts/api-server/src/routes/auth.ts`):
+
+- `POST /api/auth/signup` — bcrypt-hashes password (cost 12), enforces username
+  regex `^[a-z0-9_]{3,32}$`, optional `migrateGuestId` attaches the new
+  credentials to an existing guest row so all data carries over. Rate limited
+  5/min per IP.
+- `POST /api/auth/login` — verifies bcrypt hash, returns JWT + profile. Rate
+  limited 10/min per IP.
+- `GET /api/auth/me` — public probe; returns `{authenticated, profile?}`.
+
+Frontend auth lives in `artifacts/ironlog/src/auth/`:
+
+- `context.tsx` — `AuthProvider` exposes `setUserToken` / `clearSession`,
+  registers a `setAuthTokenGetter` returning `user:<jwt>` when present else
+  `guest:<uuid>`, and clears React Query cache on auth change.
+- Login (`pages/login.tsx`), Signup (`pages/signup.tsx`),
+  ForgotPassword (`pages/forgot-password.tsx`) — premium dark UI with the
+  IronLog dumbbell brand mark.
+- `components/sync-status.tsx` — pill badge (Synced / Syncing / Offline) driven
+  by `useIsFetching` + `useIsMutating` + `navigator.onLine`. Tracks
+  `localStorage["ironlog.lastSyncedAt"]` for tooltip relative time.
+
+The query client is wrapped with `PersistQueryClientProvider` +
+`createSyncStoragePersister` (key `ironlog.cache.v1`, 30-day TTL) so the cache
+survives reloads and offline reads. `gcTime` is 14 days so stale data stays
+available without network.
+
+Settings page surfaces account state: username + Log Out for authenticated
+users, or Sign Up / Sign In CTAs for guests.
 
 ## Equipment-aware exercise visibility
 

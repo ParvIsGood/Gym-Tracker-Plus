@@ -19,6 +19,8 @@ import type {
 import type {
   AddBodyweightBody,
   AddSetBody,
+  AuthResponse,
+  AuthState,
   BodyweightEntry,
   CompleteSessionBody,
   CreateExerciseBody,
@@ -27,6 +29,7 @@ import type {
   HealthStatus,
   ListExercisesParams,
   ListSessionsParams,
+  LoginBody,
   PersonalRecord,
   PlanDay,
   Profile,
@@ -34,6 +37,7 @@ import type {
   SessionCompletion,
   SessionSummary,
   SetEntry,
+  SignupBody,
   StartSessionBody,
   StatsSummary,
   StrengthPoint,
@@ -129,7 +133,254 @@ export function useHealthCheck<
 }
 
 /**
- * @summary Get the current guest profile
+ * @summary Create an account, optionally migrating an existing guest
+ */
+export const getSignupUrl = () => {
+  return `/api/auth/signup`;
+};
+
+export const signup = async (
+  signupBody: SignupBody,
+  options?: RequestInit,
+): Promise<AuthResponse> => {
+  return customFetch<AuthResponse>(getSignupUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(signupBody),
+  });
+};
+
+export const getSignupMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof signup>>,
+    TError,
+    { data: BodyType<SignupBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof signup>>,
+  TError,
+  { data: BodyType<SignupBody> },
+  TContext
+> => {
+  const mutationKey = ["signup"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof signup>>,
+    { data: BodyType<SignupBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return signup(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SignupMutationResult = NonNullable<
+  Awaited<ReturnType<typeof signup>>
+>;
+export type SignupMutationBody = BodyType<SignupBody>;
+export type SignupMutationError = ErrorType<void>;
+
+/**
+ * @summary Create an account, optionally migrating an existing guest
+ */
+export const useSignup = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof signup>>,
+    TError,
+    { data: BodyType<SignupBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof signup>>,
+  TError,
+  { data: BodyType<SignupBody> },
+  TContext
+> => {
+  return useMutation(getSignupMutationOptions(options));
+};
+
+/**
+ * @summary Log in to an existing account
+ */
+export const getLoginUrl = () => {
+  return `/api/auth/login`;
+};
+
+export const login = async (
+  loginBody: LoginBody,
+  options?: RequestInit,
+): Promise<AuthResponse> => {
+  return customFetch<AuthResponse>(getLoginUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(loginBody),
+  });
+};
+
+export const getLoginMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof login>>,
+    TError,
+    { data: BodyType<LoginBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof login>>,
+  TError,
+  { data: BodyType<LoginBody> },
+  TContext
+> => {
+  const mutationKey = ["login"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof login>>,
+    { data: BodyType<LoginBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return login(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LoginMutationResult = NonNullable<
+  Awaited<ReturnType<typeof login>>
+>;
+export type LoginMutationBody = BodyType<LoginBody>;
+export type LoginMutationError = ErrorType<void>;
+
+/**
+ * @summary Log in to an existing account
+ */
+export const useLogin = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof login>>,
+    TError,
+    { data: BodyType<LoginBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof login>>,
+  TError,
+  { data: BodyType<LoginBody> },
+  TContext
+> => {
+  return useMutation(getLoginMutationOptions(options));
+};
+
+/**
+ * @summary Get the active session profile
+ */
+export const getGetCurrentAuthUrl = () => {
+  return `/api/auth/me`;
+};
+
+export const getCurrentAuth = async (
+  options?: RequestInit,
+): Promise<AuthState> => {
+  return customFetch<AuthState>(getGetCurrentAuthUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetCurrentAuthQueryKey = () => {
+  return [`/api/auth/me`] as const;
+};
+
+export const getGetCurrentAuthQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCurrentAuth>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCurrentAuth>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCurrentAuthQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentAuth>>> = ({
+    signal,
+  }) => getCurrentAuth({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCurrentAuth>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCurrentAuthQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCurrentAuth>>
+>;
+export type GetCurrentAuthQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get the active session profile
+ */
+
+export function useGetCurrentAuth<
+  TData = Awaited<ReturnType<typeof getCurrentAuth>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getCurrentAuth>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCurrentAuthQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get the current profile
  */
 export const getGetProfileUrl = () => {
   return `/api/profile`;
@@ -178,7 +429,7 @@ export type GetProfileQueryResult = NonNullable<
 export type GetProfileQueryError = ErrorType<unknown>;
 
 /**
- * @summary Get the current guest profile
+ * @summary Get the current profile
  */
 
 export function useGetProfile<

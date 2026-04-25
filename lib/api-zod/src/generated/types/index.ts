@@ -8,6 +8,8 @@
 
 export * from "./addBodyweightBody";
 export * from "./addSetBody";
+export * from "./authResponse";
+export * from "./authState";
 export * from "./bodyweightEntry";
 export * from "./completeSessionBody";
 export * from "./createExerciseBody";
@@ -18,6 +20,7 @@ export * from "./frequencyPoint";
 export * from "./healthStatus";
 export * from "./listExercisesParams";
 export * from "./listSessionsParams";
+export * from "./loginBody";
 export * from "./muscleGroup";
 export * from "./personalRecord";
 export * from "./planDay";
@@ -29,6 +32,7 @@ export * from "./sessionStatus";
 export * from "./sessionSummary";
 export * from "./sessionSummaryStatus";
 export * from "./setEntry";
+export * from "./signupBody";
 export * from "./startSessionBody";
 export * from "./statsSummary";
 export * from "./strengthPoint";

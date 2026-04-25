@@ -10,8 +10,10 @@ import type { Units } from "./units";
 
 export interface Profile {
   id: string;
+  username?: string;
   displayName: string;
   equipment: EquipmentLevel;
   units: Units;
+  isGuest: boolean;
   createdAt: Date;
 }

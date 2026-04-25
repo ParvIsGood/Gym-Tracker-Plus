@@ -61,9 +61,11 @@ export const Units = {
 
 export interface Profile {
   id: string;
+  username?: string;
   displayName: string;
   equipment: EquipmentLevel;
   units: Units;
+  isGuest: boolean;
   createdAt: string;
 }
 
@@ -193,6 +195,37 @@ export interface SessionCompletion {
   session: Session;
   newPRs: PersonalRecord[];
   currentStreak: number;
+}
+
+export interface SignupBody {
+  /**
+   * @minLength 3
+   * @maxLength 32
+   */
+  username: string;
+  /**
+   * @minLength 6
+   * @maxLength 128
+   */
+  password: string;
+  displayName?: string;
+  /** Optional — absorb an existing guest account's data */
+  migrateGuestId?: string;
+}
+
+export interface LoginBody {
+  username: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  profile: Profile;
+}
+
+export interface AuthState {
+  authenticated: boolean;
+  profile?: Profile;
 }
 
 export interface StatsSummary {
