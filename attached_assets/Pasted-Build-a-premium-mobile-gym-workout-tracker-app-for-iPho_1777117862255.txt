@@ -1,0 +1,113 @@
+Build a premium mobile gym workout tracker app for iPhone and Android with a modern dark theme, smooth animations, and a motivating fitness vibe. The app should feel addictive, satisfying, and professional—like opening a premium fitness app every day. Every tap should feel smooth, every workout log should feel rewarding, and progress should feel exciting.
+
+CORE USER EXPERIENCE
+- Clean and focused UI with no clutter
+- Premium dark mode
+- Smooth transitions
+- Fast logging flow
+- Motivating charts and streaks
+- Haptic feedback if supported
+
+WEEKLY WORKOUT PLANNER
+Default split:
+Monday - Chest Day
+Tuesday - Back Day
+Wednesday - Leg Day
+Thursday - Shoulder Day
+Friday - Arms Day
+Saturday - Full Body / Weak Point Day
+Sunday - Rest Day
+Allow full customization.
+
+EXERCISES BY DAY
+Chest: Bench Press, Incline Press, Chest Fly, Pushups, Pec Deck
+Back: Lat Pulldown, Seated Row, Deadlift, Pull-ups, Cable Row
+Legs: Squats, Leg Press, Lunges, Leg Extension, Hamstring Curl, Calf Raise
+Shoulders: Shoulder Press, Lateral Raise, Rear Delt Fly, Front Raise
+Arms: Bicep Curl, Hammer Curl, Tricep Pushdown, Skull Crushers
+
+WORKOUT LOGGING SYSTEM
+When user taps Start Workout:
+- Show exercise cards one by one
+- User can choose exercises for the day
+- Add custom exercises
+
+Each exercise card includes:
+- Weight slider (0kg to 300kg)
+- Reps slider (1 to 30)
+- Sets slider (1 to 10)
+- Difficulty slider: Easy / Moderate / Hard / Failure
+- Notes field
+- Add Set button
+- Complete Exercise button
+- Skip button
+
+SMART EXERCISE SELECTION
+Ask available equipment:
+- Full gym
+- Machines only
+- Dumbbells only
+- Home workout
+Recommend matching exercises automatically.
+
+CORRECT FORM GUIDE
+Every exercise has How To Perform Correctly section.
+Examples:
+Bench Press:
+- Feet planted
+- Back tight
+- Controlled lowering
+- Press upward strongly
+
+Squat:
+- Feet shoulder width
+- Chest up
+- Knees track toes
+- Drive through heels
+
+WORKOUT COMPLETION SCREEN
+Show:
+- Workout Complete
+- Total Volume Lifted
+- Estimated Calories Burned
+- New PR badges
+- Active streak count
+- Celebration animation
+
+PROGRESS SECTION
+Charts for:
+- Strength progress by exercise
+- Body weight trend
+- Weekly workout frequency
+- Total training volume
+- Consistency score
+
+SMART FEATURES
+- Suggest previous weight used
+- Progressive overload recommendations
+- Water reminders
+- Rest timer
+- Recovery reminders
+- Missed leg day funny notification
+
+TECH REQUIREMENTS
+- Full frontend + backend + database
+- Login/signup + guest mode
+- Secure cloud sync
+- Mobile responsive
+- Fast performance
+- Works on iPhone and Android
+
+STYLE
+- Premium black / graphite theme
+- Accent red or blue
+- Rounded cards
+- Clean typography
+- Modern fitness aesthetic
+
+APP NAME IDEAS
+IronLog
+RepVault
+LiftMode
+GymVault
+GainTrack

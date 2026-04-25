@@ -1,2 +1,26 @@
 export * from "./generated/api";
-export * from "./generated/types";
+export type {
+  Difficulty,
+  EquipmentLevel,
+  MuscleGroup,
+  Units,
+  Weekday,
+  HealthStatus,
+  Profile,
+  Exercise,
+  PlanDay,
+  Session,
+  SessionExercise,
+  SessionSummary,
+  SessionStatus,
+  SessionSummaryStatus,
+  SetEntry,
+  SessionCompletion,
+  StatsSummary,
+  StrengthPoint,
+  PersonalRecord,
+  VolumePoint,
+  FrequencyPoint,
+  BodyweightEntry,
+  WaterToday,
+} from "./generated/types";

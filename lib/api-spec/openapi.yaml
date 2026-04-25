@@ -3,20 +3,33 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: IronLog API - premium gym workout tracker
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: profile
+    description: Guest profile and preferences
+  - name: exercises
+    description: Exercise catalog and form guides
+  - name: plan
+    description: Weekly workout plan
+  - name: sessions
+    description: Workout sessions and set logging
+  - name: stats
+    description: Progress, streaks, PRs and aggregates
+  - name: bodyweight
+    description: Body weight tracking
+  - name: water
+    description: Water intake tracking
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +37,388 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get the current guest profile
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    patch:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update display name, equipment, units
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /exercises:
+    get:
+      operationId: listExercises
+      tags: [exercises]
+      summary: List exercises in catalog
+      parameters:
+        - in: query
+          name: muscleGroup
+          required: false
+          schema:
+            $ref: "#/components/schemas/MuscleGroup"
+        - in: query
+          name: equipment
+          required: false
+          schema:
+            $ref: "#/components/schemas/EquipmentLevel"
+      responses:
+        "200":
+          description: Exercise list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Exercise"
+    post:
+      operationId: createExercise
+      tags: [exercises]
+      summary: Add a custom exercise
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExerciseBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
+  /exercises/{id}:
+    get:
+      operationId: getExercise
+      tags: [exercises]
+      summary: Get an exercise with form guide
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Exercise detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exercise"
+
+  /plan:
+    get:
+      operationId: getPlan
+      tags: [plan]
+      summary: Get the user's weekly plan (Mon-Sun)
+      responses:
+        "200":
+          description: Weekly plan
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlanDay"
+  /plan/{day}:
+    put:
+      operationId: updatePlanDay
+      tags: [plan]
+      summary: Update a day's label and exercises
+      parameters:
+        - in: path
+          name: day
+          required: true
+          schema:
+            $ref: "#/components/schemas/Weekday"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePlanDayBody"
+      responses:
+        "200":
+          description: Updated day
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanDay"
+
+  /sessions:
+    get:
+      operationId: listSessions
+      tags: [sessions]
+      summary: List recent workout sessions
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: Sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionSummary"
+    post:
+      operationId: startSession
+      tags: [sessions]
+      summary: Start a new workout session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartSessionBody"
+      responses:
+        "201":
+          description: Session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+  /sessions/{id}:
+    get:
+      operationId: getSession
+      tags: [sessions]
+      summary: Get a session with all logged sets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+    patch:
+      operationId: completeSession
+      tags: [sessions]
+      summary: Mark a session complete and capture summary
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompleteSessionBody"
+      responses:
+        "200":
+          description: Session with completion summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionCompletion"
+
+  /sessions/{id}/sets:
+    post:
+      operationId: addSet
+      tags: [sessions]
+      summary: Log a set
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddSetBody"
+      responses:
+        "201":
+          description: Set logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetEntry"
+  /sets/{id}:
+    delete:
+      operationId: deleteSet
+      tags: [sessions]
+      summary: Delete a logged set
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /stats/summary:
+    get:
+      operationId: getStatsSummary
+      tags: [stats]
+      summary: Dashboard summary - streak, totals, weekly counts, consistency
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsSummary"
+  /stats/volume:
+    get:
+      operationId: getVolumeTimeline
+      tags: [stats]
+      summary: Weekly total volume timeline (last 12 weeks)
+      responses:
+        "200":
+          description: Timeline
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VolumePoint"
+  /stats/frequency:
+    get:
+      operationId: getFrequencyTimeline
+      tags: [stats]
+      summary: Weekly workout frequency (last 12 weeks)
+      responses:
+        "200":
+          description: Frequency
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FrequencyPoint"
+  /stats/strength/{exerciseId}:
+    get:
+      operationId: getStrengthProgress
+      tags: [stats]
+      summary: Top set per session for an exercise (strength progress)
+      parameters:
+        - in: path
+          name: exerciseId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Strength points
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StrengthPoint"
+  /stats/prs:
+    get:
+      operationId: listPersonalRecords
+      tags: [stats]
+      summary: Personal records by exercise (best weight x reps)
+      responses:
+        "200":
+          description: PRs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PersonalRecord"
+
+  /bodyweight:
+    get:
+      operationId: listBodyweight
+      tags: [bodyweight]
+      summary: Body weight history
+      responses:
+        "200":
+          description: Entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BodyweightEntry"
+    post:
+      operationId: addBodyweight
+      tags: [bodyweight]
+      summary: Add a body weight entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddBodyweightBody"
+      responses:
+        "201":
+          description: Added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BodyweightEntry"
+
+  /water/today:
+    get:
+      operationId: getWaterToday
+      tags: [water]
+      summary: Today's water intake (cups)
+      responses:
+        "200":
+          description: Today
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaterToday"
+    post:
+      operationId: addWaterCup
+      tags: [water]
+      summary: Add one cup (250ml) of water for today
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaterToday"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +429,367 @@ components:
       required:
         - status
 
+    MuscleGroup:
+      type: string
+      enum: [chest, back, legs, shoulders, arms, core, full_body]
+
+    EquipmentLevel:
+      type: string
+      enum: [full_gym, machines_only, dumbbells_only, home]
+
+    Weekday:
+      type: string
+      enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+
+    Difficulty:
+      type: string
+      enum: [easy, moderate, hard, failure]
+
+    Units:
+      type: string
+      enum: [kg, lb]
+
+    Profile:
+      type: object
+      required: [id, displayName, equipment, units, createdAt]
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        equipment:
+          $ref: "#/components/schemas/EquipmentLevel"
+        units:
+          $ref: "#/components/schemas/Units"
+        createdAt:
+          type: string
+          format: date-time
+
+    UpdateProfileBody:
+      type: object
+      properties:
+        displayName:
+          type: string
+        equipment:
+          $ref: "#/components/schemas/EquipmentLevel"
+        units:
+          $ref: "#/components/schemas/Units"
+
+    Exercise:
+      type: object
+      required: [id, name, muscleGroup, equipment, isCustom, formCues]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        muscleGroup:
+          $ref: "#/components/schemas/MuscleGroup"
+        equipment:
+          $ref: "#/components/schemas/EquipmentLevel"
+        isCustom:
+          type: boolean
+        description:
+          type: string
+        formCues:
+          type: array
+          items:
+            type: string
+
+    CreateExerciseBody:
+      type: object
+      required: [name, muscleGroup, equipment]
+      properties:
+        name:
+          type: string
+        muscleGroup:
+          $ref: "#/components/schemas/MuscleGroup"
+        equipment:
+          $ref: "#/components/schemas/EquipmentLevel"
+        description:
+          type: string
+        formCues:
+          type: array
+          items:
+            type: string
+
+    PlanDay:
+      type: object
+      required: [day, label, exercises]
+      properties:
+        day:
+          $ref: "#/components/schemas/Weekday"
+        label:
+          type: string
+        isRest:
+          type: boolean
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/Exercise"
+
+    UpdatePlanDayBody:
+      type: object
+      required: [label, exerciseIds]
+      properties:
+        label:
+          type: string
+        isRest:
+          type: boolean
+        exerciseIds:
+          type: array
+          items:
+            type: string
+
+    SetEntry:
+      type: object
+      required: [id, sessionExerciseId, setNumber, weight, reps, difficulty, createdAt]
+      properties:
+        id:
+          type: string
+        sessionExerciseId:
+          type: string
+        setNumber:
+          type: integer
+        weight:
+          type: number
+        reps:
+          type: integer
+        difficulty:
+          $ref: "#/components/schemas/Difficulty"
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    SessionExercise:
+      type: object
+      required: [id, exercise, sets]
+      properties:
+        id:
+          type: string
+        exercise:
+          $ref: "#/components/schemas/Exercise"
+        sets:
+          type: array
+          items:
+            $ref: "#/components/schemas/SetEntry"
+
+    Session:
+      type: object
+      required: [id, day, label, status, startedAt, exercises]
+      properties:
+        id:
+          type: string
+        day:
+          $ref: "#/components/schemas/Weekday"
+        label:
+          type: string
+        status:
+          type: string
+          enum: [active, completed]
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        durationSec:
+          type: integer
+        totalVolume:
+          type: number
+        estimatedCalories:
+          type: integer
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionExercise"
+
+    SessionSummary:
+      type: object
+      required: [id, day, label, status, startedAt, totalSets]
+      properties:
+        id:
+          type: string
+        day:
+          $ref: "#/components/schemas/Weekday"
+        label:
+          type: string
+        status:
+          type: string
+          enum: [active, completed]
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        durationSec:
+          type: integer
+        totalVolume:
+          type: number
+        estimatedCalories:
+          type: integer
+        totalSets:
+          type: integer
+
+    StartSessionBody:
+      type: object
+      required: [day, label, exerciseIds]
+      properties:
+        day:
+          $ref: "#/components/schemas/Weekday"
+        label:
+          type: string
+        exerciseIds:
+          type: array
+          items:
+            type: string
+
+    CompleteSessionBody:
+      type: object
+      properties:
+        durationSec:
+          type: integer
+
+    AddSetBody:
+      type: object
+      required: [exerciseId, weight, reps, difficulty]
+      properties:
+        exerciseId:
+          type: string
+        weight:
+          type: number
+        reps:
+          type: integer
+        difficulty:
+          $ref: "#/components/schemas/Difficulty"
+        notes:
+          type: string
+
+    SessionCompletion:
+      type: object
+      required: [session, newPRs, currentStreak]
+      properties:
+        session:
+          $ref: "#/components/schemas/Session"
+        newPRs:
+          type: array
+          items:
+            $ref: "#/components/schemas/PersonalRecord"
+        currentStreak:
+          type: integer
+
+    StatsSummary:
+      type: object
+      required:
+        - currentStreak
+        - longestStreak
+        - workoutsThisWeek
+        - workoutsAllTime
+        - totalVolumeAllTime
+        - consistencyScore
+        - lastWorkoutDay
+      properties:
+        currentStreak:
+          type: integer
+        longestStreak:
+          type: integer
+        workoutsThisWeek:
+          type: integer
+        workoutsAllTime:
+          type: integer
+        totalVolumeAllTime:
+          type: number
+        consistencyScore:
+          type: integer
+          description: 0-100 based on last 4 weeks
+        lastWorkoutDay:
+          type: string
+          format: date-time
+        skippedLegDay:
+          type: boolean
+
+    VolumePoint:
+      type: object
+      required: [weekStart, volume]
+      properties:
+        weekStart:
+          type: string
+          format: date
+        volume:
+          type: number
+
+    FrequencyPoint:
+      type: object
+      required: [weekStart, count]
+      properties:
+        weekStart:
+          type: string
+          format: date
+        count:
+          type: integer
+
+    StrengthPoint:
+      type: object
+      required: [date, topWeight, topReps, estimatedOneRm]
+      properties:
+        date:
+          type: string
+          format: date
+        topWeight:
+          type: number
+        topReps:
+          type: integer
+        estimatedOneRm:
+          type: number
+
+    PersonalRecord:
+      type: object
+      required: [exerciseId, exerciseName, weight, reps, achievedAt]
+      properties:
+        exerciseId:
+          type: string
+        exerciseName:
+          type: string
+        weight:
+          type: number
+        reps:
+          type: integer
+        estimatedOneRm:
+          type: number
+        achievedAt:
+          type: string
+          format: date-time
+
+    BodyweightEntry:
+      type: object
+      required: [id, weight, recordedAt]
+      properties:
+        id:
+          type: string
+        weight:
+          type: number
+        recordedAt:
+          type: string
+          format: date-time
+
+    AddBodyweightBody:
+      type: object
+      required: [weight]
+      properties:
+        weight:
+          type: number
+
+    WaterToday:
+      type: object
+      required: [date, cups, goalCups]
+      properties:
+        date:
+          type: string
+          format: date
+        cups:
+          type: integer
+        goalCups:
+          type: integer
