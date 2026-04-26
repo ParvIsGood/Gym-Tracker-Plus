@@ -90,6 +90,40 @@ On the first `GET /api/plan`, a default Mon-Sun plan is created using the
 user's equipment level: Mon Chest, Tue Back, Wed Legs, Thu Shoulders, Fri Arms,
 Sat Full Body, Sun Rest.
 
+## Previous performance & smart suggestions
+
+`GET /api/exercises/:id/last-performance` (`artifacts/api-server/src/routes/last-performance.ts`)
+returns:
+
+- `last` — the most recent completed session containing this exercise:
+  topWeight × topReps (heaviest set, max reps at that weight), totalSets,
+  date, sessionLabel, avgDifficulty (mode), notes (first non-empty), Epley
+  estimated 1RM.
+- `suggestion` — progressive-overload nudge derived from `avgDifficulty`:
+  easy → +2.5 kg; moderate → same weight, +1 rep; hard → match weight/reps;
+  failure → −2.5 kg.
+- `isPR` — true if the latest session's est. 1RM strictly beats every prior
+  session's 1RM for that exercise (also true on the very first session).
+- `recent` — last 5 completed sessions for that exercise (same shape as
+  `last`).
+
+Data comes from a single drizzle join over `sets → session_exercises →
+sessions` filtered by `userId + status='completed' + exerciseId`, ordered
+newest-first.
+
+The frontend renders this everywhere the user opens an exercise:
+
+- `artifacts/ironlog/src/components/previous-performance-card.tsx` — premium
+  glowing stat card with Trophy badge on PR, Synced/Last-time stats grid,
+  notes preview, and a "Use" button on the suggestion to instantly seed the
+  weight/reps sliders. The "View History" button opens a bottom sheet showing
+  the last 5 sessions with progression bars.
+- Mounted into `pages/workout-active.tsx` (above the input sliders, with
+  cache invalidation after every set logged) and `pages/exercise-detail.tsx`
+  (top of the page).
+- Empty state shows "No previous data yet. Start your journey today." for
+  brand-new exercises.
+
 ## PR detection
 
 On `POST /api/sessions/:id` (complete), the server computes Epley 1RM for every

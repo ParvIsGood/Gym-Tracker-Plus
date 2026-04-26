@@ -4,6 +4,7 @@ import { ChevronLeft, Info, LineChart as ChartLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 import { format, parseISO } from "date-fns";
+import { PreviousPerformanceCard } from "@/components/previous-performance-card";
 
 export default function ExerciseDetail() {
   const { id } = useParams();
@@ -34,6 +35,8 @@ export default function ExerciseDetail() {
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-8 pb-8">
+        <PreviousPerformanceCard exerciseId={exercise.id} exerciseName={exercise.name} />
+
         {exercise.description && (
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">

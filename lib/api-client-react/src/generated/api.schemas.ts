@@ -257,6 +257,32 @@ export interface StrengthPoint {
   estimatedOneRm: number;
 }
 
+export interface LastSessionEntry {
+  sessionId: string;
+  date: string;
+  sessionLabel: string;
+  topWeight: number;
+  topReps: number;
+  totalSets: number;
+  estimatedOneRm: number;
+  avgDifficulty?: Difficulty;
+  notes?: string;
+}
+
+export interface SmartSuggestion {
+  weight: number;
+  reps: number;
+  reason: string;
+}
+
+export interface LastPerformance {
+  hasHistory: boolean;
+  isPR: boolean;
+  last?: LastSessionEntry;
+  suggestion?: SmartSuggestion;
+  recent: LastSessionEntry[];
+}
+
 export interface BodyweightEntry {
   id: string;
   weight: number;

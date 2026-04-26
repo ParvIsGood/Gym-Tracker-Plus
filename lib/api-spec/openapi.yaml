@@ -190,6 +190,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/Exercise"
 
+  /exercises/{id}/last-performance:
+    get:
+      operationId: getLastPerformance
+      tags: [exercises]
+      summary: Get the user's last performance + smart suggestion + recent history for an exercise
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Last performance, suggestion, and recent sessions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LastPerformance"
+
   /plan:
     get:
       operationId: getPlan
@@ -854,6 +873,59 @@ components:
           type: integer
         estimatedOneRm:
           type: number
+
+    LastSessionEntry:
+      type: object
+      required:
+        [sessionId, date, sessionLabel, topWeight, topReps, totalSets, estimatedOneRm]
+      properties:
+        sessionId:
+          type: string
+        date:
+          type: string
+          format: date-time
+        sessionLabel:
+          type: string
+        topWeight:
+          type: number
+        topReps:
+          type: integer
+        totalSets:
+          type: integer
+        estimatedOneRm:
+          type: number
+        avgDifficulty:
+          $ref: "#/components/schemas/Difficulty"
+        notes:
+          type: string
+
+    SmartSuggestion:
+      type: object
+      required: [weight, reps, reason]
+      properties:
+        weight:
+          type: number
+        reps:
+          type: integer
+        reason:
+          type: string
+
+    LastPerformance:
+      type: object
+      required: [hasHistory, isPR, recent]
+      properties:
+        hasHistory:
+          type: boolean
+        isPR:
+          type: boolean
+        last:
+          $ref: "#/components/schemas/LastSessionEntry"
+        suggestion:
+          $ref: "#/components/schemas/SmartSuggestion"
+        recent:
+          type: array
+          items:
+            $ref: "#/components/schemas/LastSessionEntry"
 
     PersonalRecord:
       type: object

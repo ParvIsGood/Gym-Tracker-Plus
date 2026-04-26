@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "wouter";
-import { useGetSession, useAddSet, useCompleteSession, useDeleteSet, getGetSessionQueryKey, getGetStatsSummaryQueryKey, getListSessionsQueryKey, getListPersonalRecordsQueryKey, Difficulty } from "@workspace/api-client-react";
+import { useGetSession, useAddSet, useCompleteSession, useDeleteSet, getGetSessionQueryKey, getGetStatsSummaryQueryKey, getListSessionsQueryKey, getListPersonalRecordsQueryKey, getGetLastPerformanceQueryKey, Difficulty } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Info, Play, Square, RotateCcw, X, Dumbbell } from "lucide-react";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { PreviousPerformanceCard } from "@/components/previous-performance-card";
 
 export default function WorkoutActive() {
   const { id } = useParams();
@@ -77,6 +78,7 @@ export default function WorkoutActive() {
         }
       });
       queryClient.invalidateQueries({ queryKey: getGetSessionQueryKey(session.id) });
+      queryClient.invalidateQueries({ queryKey: getGetLastPerformanceQueryKey(exercise.id) });
       setNotes("");
       setShowNotes(false);
     } catch (err) {
@@ -105,6 +107,11 @@ export default function WorkoutActive() {
     } else {
       handleCompleteSession();
     }
+  };
+
+  const applySuggestion = (w: number, r: number) => {
+    setWeight(w);
+    setReps(r);
   };
 
   const handleCompleteSession = async () => {
@@ -147,9 +154,18 @@ export default function WorkoutActive() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 pb-32">
-        <div className="mb-6">
+        <div className="mb-5">
           <h2 className="text-3xl font-bold uppercase tracking-tight">{exercise.name}</h2>
           <p className="text-sm text-primary capitalize">{exercise.muscleGroup.replace('_', ' ')} • {exercise.equipment.replace('_', ' ')}</p>
+        </div>
+
+        {/* Previous Performance */}
+        <div className="mb-5" key={exercise.id}>
+          <PreviousPerformanceCard
+            exerciseId={exercise.id}
+            exerciseName={exercise.name}
+            onApplySuggestion={applySuggestion}
+          />
         </div>
 
         {/* Inputs */}

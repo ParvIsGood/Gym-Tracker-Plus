@@ -192,6 +192,55 @@ export const GetExerciseResponse = zod.object({
 });
 
 /**
+ * @summary Get the user's last performance + smart suggestion + recent history for an exercise
+ */
+export const GetLastPerformanceParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetLastPerformanceResponse = zod.object({
+  hasHistory: zod.boolean(),
+  isPR: zod.boolean(),
+  last: zod
+    .object({
+      sessionId: zod.string(),
+      date: zod.coerce.date(),
+      sessionLabel: zod.string(),
+      topWeight: zod.number(),
+      topReps: zod.number(),
+      totalSets: zod.number(),
+      estimatedOneRm: zod.number(),
+      avgDifficulty: zod
+        .enum(["easy", "moderate", "hard", "failure"])
+        .optional(),
+      notes: zod.string().optional(),
+    })
+    .optional(),
+  suggestion: zod
+    .object({
+      weight: zod.number(),
+      reps: zod.number(),
+      reason: zod.string(),
+    })
+    .optional(),
+  recent: zod.array(
+    zod.object({
+      sessionId: zod.string(),
+      date: zod.coerce.date(),
+      sessionLabel: zod.string(),
+      topWeight: zod.number(),
+      topReps: zod.number(),
+      totalSets: zod.number(),
+      estimatedOneRm: zod.number(),
+      avgDifficulty: zod
+        .enum(["easy", "moderate", "hard", "failure"])
+        .optional(),
+      notes: zod.string().optional(),
+    }),
+  ),
+});
+
+/**
  * @summary Get the user's weekly plan (Mon-Sun)
  */
 export const GetPlanResponseItem = zod.object({

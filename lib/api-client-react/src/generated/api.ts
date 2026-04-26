@@ -27,6 +27,7 @@ import type {
   Exercise,
   FrequencyPoint,
   HealthStatus,
+  LastPerformance,
   ListExercisesParams,
   ListSessionsParams,
   LoginBody,
@@ -797,6 +798,93 @@ export function useGetExercise<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetExerciseQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get the user's last performance + smart suggestion + recent history for an exercise
+ */
+export const getGetLastPerformanceUrl = (id: string) => {
+  return `/api/exercises/${id}/last-performance`;
+};
+
+export const getLastPerformance = async (
+  id: string,
+  options?: RequestInit,
+): Promise<LastPerformance> => {
+  return customFetch<LastPerformance>(getGetLastPerformanceUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetLastPerformanceQueryKey = (id: string) => {
+  return [`/api/exercises/${id}/last-performance`] as const;
+};
+
+export const getGetLastPerformanceQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLastPerformance>>,
+  TError = ErrorType<unknown>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLastPerformance>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetLastPerformanceQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getLastPerformance>>
+  > = ({ signal }) => getLastPerformance(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getLastPerformance>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetLastPerformanceQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLastPerformance>>
+>;
+export type GetLastPerformanceQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get the user's last performance + smart suggestion + recent history for an exercise
+ */
+
+export function useGetLastPerformance<
+  TData = Awaited<ReturnType<typeof getLastPerformance>>,
+  TError = ErrorType<unknown>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLastPerformance>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLastPerformanceQueryOptions(id, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
