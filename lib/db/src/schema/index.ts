@@ -22,6 +22,7 @@ export const usersTable = pgTable(
     displayName: text("display_name").notNull().default("Athlete"),
     equipment: text("equipment").notNull().default("full_gym"),
     units: text("units").notNull().default("kg"),
+    onboardedAt: timestamp("onboarded_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

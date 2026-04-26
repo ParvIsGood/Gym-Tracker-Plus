@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useUpdateProfile, useAddBodyweight, getGetProfileQueryKey } from "@workspace/api-client-react";
-import { markOnboarded } from "@/auth/context";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,8 +43,10 @@ export default function Onboarding() {
         });
       }
 
-      queryClient.invalidateQueries({ queryKey: getGetProfileQueryKey() });
-      markOnboarded();
+      // Make sure we read the freshly-flagged isOnboarded profile before navigating,
+      // otherwise the AuthWrapper will bounce us right back to onboarding.
+      await queryClient.invalidateQueries({ queryKey: getGetProfileQueryKey() });
+      await queryClient.refetchQueries({ queryKey: getGetProfileQueryKey() });
       setLocation("/");
     } catch (err) {
       console.error(err);

@@ -13,6 +13,7 @@ function serialize(u: typeof usersTable.$inferSelect) {
     equipment: u.equipment,
     units: u.units,
     isGuest: u.username == null,
+    isOnboarded: u.onboardedAt != null,
     createdAt: u.createdAt.toISOString(),
   };
 }
@@ -34,10 +35,23 @@ router.patch("/profile", async (req, res) => {
     res.status(400).json({ error: "Invalid body", issues: parse.error.issues });
     return;
   }
+  const existing = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+  if (existing.length === 0) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
   const update: Partial<typeof usersTable.$inferInsert> = { updatedAt: new Date() };
   if (parse.data.displayName !== undefined) update.displayName = parse.data.displayName;
   if (parse.data.equipment !== undefined) update.equipment = parse.data.equipment;
   if (parse.data.units !== undefined) update.units = parse.data.units;
+  // Saving the profile counts as completing onboarding.
+  if (existing[0].onboardedAt == null) {
+    update.onboardedAt = new Date();
+  }
 
   await db.update(usersTable).set(update).where(eq(usersTable.id, userId));
 

@@ -531,7 +531,7 @@ components:
 
     Profile:
       type: object
-      required: [id, displayName, equipment, units, isGuest, createdAt]
+      required: [id, displayName, equipment, units, isGuest, isOnboarded, createdAt]
       properties:
         id:
           type: string
@@ -545,6 +545,9 @@ components:
           $ref: "#/components/schemas/Units"
         isGuest:
           type: boolean
+        isOnboarded:
+          type: boolean
+          description: True once the user has completed onboarding (or updated their profile)
         createdAt:
           type: string
           format: date-time

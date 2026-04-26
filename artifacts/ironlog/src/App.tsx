@@ -81,10 +81,15 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
     return <Redirect to="/login" />;
   }
 
-  // First run: drop user into onboarding once.
-  const onboardingDone = localStorage.getItem("ironlog.onboarded") === "1";
-  if (profile && !onboardingDone && location !== "/onboarding") {
+  // First run: drop user into onboarding once. The server profile is the
+  // source of truth so that a fresh browser / new device for an already
+  // onboarded account does not loop back through the welcome flow.
+  if (profile && !profile.isOnboarded && location !== "/onboarding") {
     return <Redirect to="/onboarding" />;
+  }
+  // If they revisit /onboarding after completing it, send them home.
+  if (profile && profile.isOnboarded && location === "/onboarding") {
+    return <Redirect to="/" />;
   }
 
   return <>{children}</>;

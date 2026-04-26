@@ -55,6 +55,11 @@ export const LoginResponse = zod.object({
     ]),
     units: zod.enum(["kg", "lb"]),
     isGuest: zod.boolean(),
+    isOnboarded: zod
+      .boolean()
+      .describe(
+        "True once the user has completed onboarding (or updated their profile)",
+      ),
     createdAt: zod.coerce.date(),
   }),
 });
@@ -77,6 +82,11 @@ export const GetCurrentAuthResponse = zod.object({
       ]),
       units: zod.enum(["kg", "lb"]),
       isGuest: zod.boolean(),
+      isOnboarded: zod
+        .boolean()
+        .describe(
+          "True once the user has completed onboarding (or updated their profile)",
+        ),
       createdAt: zod.coerce.date(),
     })
     .optional(),
@@ -92,6 +102,11 @@ export const GetProfileResponse = zod.object({
   equipment: zod.enum(["full_gym", "machines_only", "dumbbells_only", "home"]),
   units: zod.enum(["kg", "lb"]),
   isGuest: zod.boolean(),
+  isOnboarded: zod
+    .boolean()
+    .describe(
+      "True once the user has completed onboarding (or updated their profile)",
+    ),
   createdAt: zod.coerce.date(),
 });
 
@@ -113,6 +128,11 @@ export const UpdateProfileResponse = zod.object({
   equipment: zod.enum(["full_gym", "machines_only", "dumbbells_only", "home"]),
   units: zod.enum(["kg", "lb"]),
   isGuest: zod.boolean(),
+  isOnboarded: zod
+    .boolean()
+    .describe(
+      "True once the user has completed onboarding (or updated their profile)",
+    ),
   createdAt: zod.coerce.date(),
 });
 

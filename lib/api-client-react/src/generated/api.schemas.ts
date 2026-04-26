@@ -66,6 +66,8 @@ export interface Profile {
   equipment: EquipmentLevel;
   units: Units;
   isGuest: boolean;
+  /** True once the user has completed onboarding (or updated their profile) */
+  isOnboarded: boolean;
   createdAt: string;
 }
 
